@@ -7,9 +7,7 @@
 
 #define TAMANHO_LISTA 4601
 
-#define TAMANHO_LISTA 4601
-
-const char palavras[][6] = {"agimo",
+const char palavras[TAMANHO_LISTA][6] = {"agimo",
                             "agira",
                             "agita",
                             "agite",
@@ -4617,7 +4615,7 @@ char converterParaCaixaBaixa(char caractere);
 bool eValidaPalavra(char[]);
 bool limparBuffer();
 void getPalavra(char palavraDigitada[]);
-bool checkPalavra(const char[], const char[]);
+bool checkPalavra(const char[], const char[], char[]);
 
 int main()
 {
@@ -4627,7 +4625,8 @@ int main()
   int modo = 1;
 
   char palavraDigitada[6];
-  char palavraDia[6];
+  char palavraDia1[6], palavraDia2[6], palavraDia3[6], palavraDia4[6];
+  char gabarito1[6], gabarito2[6], gabarito3[6], gabarito4[6];
   int tentativas = 0;
   bool jogoTerminou = false, venceu = false;
 
@@ -4639,12 +4638,14 @@ int main()
   {
     std::cout << "Digite o número corresponde ao modo :\n";
     std::cout << "1 - Uma palavra\n";
-    std::cout << "2 - Duas palavras\n\n";
+    std::cout << "2 - Duas palavras\n";
+    std::cout << "4 - Quatro palavras\n\n";
     std::cin >> modo;
-    std::cin.ignore();
-  } while (!((modo == 1) || (modo == 2)));
+    limparBuffer();
+    std::cin.ignore(INT_MAX, '\n');
+  } while (!((modo == 1) || (modo == 2) || (modo == 4)));
 
-  std::cout << "===================================================\n";
+  std::cout << "\n===================================================\n";
   std::cout << "Legenda:\n";
   std::cout << "N: letra não existe na palavra.\n";
   std::cout << "E: existe na palavra, mas está na posição errada.\n";
@@ -4654,7 +4655,7 @@ int main()
   if (modo == 1)
   {
 
-    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia);
+    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia1);
 
     std::cout << "Digite uma palavra de 5 letras:\n";
 
@@ -4662,7 +4663,7 @@ int main()
     {
       getPalavra(palavraDigitada);
 
-      venceu = checkPalavra(palavraDigitada, palavraDia);
+      venceu = checkPalavra(palavraDigitada, palavraDia1, gabarito1);
       tentativas++;
       jogoTerminou = tentativas > 5 || venceu;
 
@@ -4674,40 +4675,143 @@ int main()
     }
     else
     {
-      std::cout << "A palavra era " << palavraDia << ".\n";
+      std::cout << "A palavra era " << palavraDia1 << ".\n";
       std::cout << "Fim do Jogo. Aperte para finalizar.\n";
       std::cin.ignore();
     }
   }
-  // else
-  // {
-  //   definePalavraDoDia(std::rand() % TAMANHO_LISTA);
-  //   defineSegundaPalavraDoDia(std::rand() % TAMANHO_LISTA);
+  else if (modo == 2)
+  {
+    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia1);
+    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia2);
 
-  //   std::cout << "Digite duas palavras de 5 letras (separadas por \\n):\n";
+    std::cout << "Digite uma palavra de 5 letras:\n";
 
-  //   do
-  //   {
-  //     getPalavra();
+    bool umaFeita = false;
+    bool segundaFeita = false;
+    
+    do
+    {
+      getPalavra(palavraDigitada);
 
-  //     venceu = checkDuasPalavras();
-  //     jogoTerminou = tentativas >= 6 || venceu;
-  //     tentativas++;
 
-  //   } while (!jogoTerminou);
+      if (!umaFeita) umaFeita = checkPalavra(palavraDigitada, palavraDia1, gabarito1);
+      if (!segundaFeita) segundaFeita = checkPalavra(palavraDigitada, palavraDia2, gabarito2);
 
-  //   if (venceu)
-  //   {
-  //     std::cin.ignore();
-  //     std::cout << "Parabéns!\n";
-  //   }
-  //   else
-  //   {
-  //     std::cin.ignore();
-  //     std::cout << "A palavras eram " << primeiraLetraPalavraDia << segundaLetraPalavraDia << terceiraLetraPalavraDia << quartaLetraPalavraDia << quintaLetraPalavraDia << " e " << primeiraLetraSegundaPalavraDia << segundaLetraSegundaPalavraDia << terceiraLetraSegundaPalavraDia << quartaLetraSegundaPalavraDia << quintaLetraSegundaPalavraDia << ".\n";
-  //     std::cout << "Fim do Jogo. Aperte para finalizar.\n";
-  //   }
-  // }
+      std::cout << std::left << std::setw(7) << std::setfill(' ') << palavraDigitada << std::left << palavraDigitada << "\n"; 
+
+      if (umaFeita)
+      {
+        std::cout << std::left << std::setw(7) << std::setfill(' ') << ""; 
+      }
+      else
+      {
+        std::cout << std::left << std::setw(7) << std::setfill(' ') << gabarito1; 
+      }
+      
+      if (segundaFeita)
+      {
+        std::cout << std::left << "\n\n"; 
+      }
+      else
+      {
+        std::cout << std::left << gabarito2 << "\n\n"; 
+      }
+
+      venceu = umaFeita && segundaFeita;
+      tentativas++;
+      jogoTerminou = tentativas > 5 || venceu;
+
+    } while (!jogoTerminou);
+
+    if (venceu)
+    {
+      std::cout << "Parabéns!\n";
+    }
+    else
+    {
+      std::cout << "A palavras eram " << palavraDia1 << " e " << palavraDia2 << ".\n";
+      std::cout << "Fim do Jogo. Aperte para finalizar.\n";
+    }
+  }
+  else if (modo == 4)
+  {
+    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia1);
+    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia2);
+    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia3);
+    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia4);
+
+    std::cout << "Digite uma palavra de 5 letras:\n";
+
+    bool umaFeita = false;
+    bool segundaFeita = false;
+    bool terceiraFeita = false;
+    bool quartaFeita = false;
+
+    do
+    {
+      getPalavra(palavraDigitada);
+
+
+      if (!umaFeita) umaFeita = checkPalavra(palavraDigitada, palavraDia1, gabarito1);
+      if (!segundaFeita) segundaFeita = checkPalavra(palavraDigitada, palavraDia2, gabarito2);
+      if (!terceiraFeita) terceiraFeita = checkPalavra(palavraDigitada, palavraDia3, gabarito3);
+      if (!quartaFeita) quartaFeita = checkPalavra(palavraDigitada, palavraDia4, gabarito4);
+
+      std::cout << std::left << std::setw(7) << std::setfill(' ') << palavraDigitada << std::left << std::setw(7) << std::setfill(' ') << palavraDigitada << std::left << std::setw(7) << std::setfill(' ') << palavraDigitada << std::left << palavraDigitada << "\n"; 
+
+      if (umaFeita)
+      {
+        std::cout << std::left << std::setw(7) << std::setfill(' ') << ""; 
+      }
+      else
+      {
+        std::cout << std::left << std::setw(7) << std::setfill(' ') << gabarito1; 
+      }
+      
+      if (segundaFeita)
+      {
+        std::cout << std::left << std::setw(7) << std::setfill(' ') << ""; 
+      }
+      else
+      {
+        std::cout << std::left << std::setw(7) << std::setfill(' ') << gabarito2;
+      }
+
+      if (terceiraFeita)
+      {
+        std::cout << std::left << std::setw(7) << std::setfill(' ') << ""; 
+      }
+      else
+      {
+        std::cout << std::left << std::setw(7) << std::setfill(' ') << gabarito3; 
+      }
+      
+      if (quartaFeita)
+      {
+        std::cout << std::left << "\n\n"; 
+      }
+      else
+      {
+        std::cout << std::left << gabarito4 << "\n\n"; 
+      }
+
+      venceu = umaFeita && segundaFeita && terceiraFeita && quartaFeita;
+      tentativas++;
+      jogoTerminou = tentativas > 5 || venceu;
+
+    } while (!jogoTerminou);
+
+    if (venceu)
+    {
+      std::cout << "Parabéns!\n";
+    }
+    else
+    {
+      std::cout << "A palavras eram " << palavraDia1 << ", " << palavraDia2 << ", " << palavraDia3 << " e " << palavraDia4 << ".\n";
+      std::cout << "Fim do Jogo. Aperte para finalizar.\n";
+    }
+  }
 
   std::cin.ignore();
 
@@ -4715,7 +4819,7 @@ int main()
 }
 
 
-bool checkPalavra(const char palavraDigitada[], const char palavraDia[])
+bool checkPalavra(const char palavraDigitada[], const char palavraDia[], char gabaritoo[])
 {
   /* Status de cada letra digitada pelo usuário, sendo que:
   N = Não existe na palavra.
@@ -4761,7 +4865,7 @@ bool checkPalavra(const char palavraDigitada[], const char palavraDia[])
     }
   }
 
-  std::cout << gabarito << "\n\n";
+  strcpy(gabaritoo, gabarito);
 
   return !strcmp(palavraDigitada, palavraDia);
 }
