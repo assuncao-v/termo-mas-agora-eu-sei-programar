@@ -6,8 +6,9 @@
 #include <climits>
 
 #define TAMANHO_LISTA 4601
+#define TAMANHO_PALAVRA 6
 
-const char palavras[TAMANHO_LISTA][6] = {"agimo",
+const char palavras[TAMANHO_LISTA][TAMANHO_PALAVRA] = {"agimo",
                             "agira",
                             "agita",
                             "agite",
@@ -4608,14 +4609,13 @@ const char palavras[TAMANHO_LISTA][6] = {"agimo",
                             "zurra",
                             "zurre",
                             "zurro"};
-                            
 
-void definePalavraDoDia(int randomNumber, char palavraDoDia[]);
-char converterParaCaixaBaixa(char caractere);
+void definePalavraDoDia(int, char [][TAMANHO_PALAVRA], int);
+char converterParaCaixaBaixa(char);
 bool eValidaPalavra(char[]);
 bool limparBuffer();
-void getPalavra(char palavraDigitada[]);
-bool checkPalavra(const char[], const char[], char[]);
+void getPalavra(char[]);
+bool checkPalavra(const char[], const char[][TAMANHO_PALAVRA], char[][TAMANHO_PALAVRA], bool[] ,int);
 
 int main()
 {
@@ -4624,11 +4624,12 @@ int main()
 
   int modo = 1;
 
-  char palavraDigitada[6];
-  char palavraDia1[6], palavraDia2[6], palavraDia3[6], palavraDia4[6];
-  char gabarito1[6], gabarito2[6], gabarito3[6], gabarito4[6];
+  char palavraDigitada[TAMANHO_PALAVRA];
+  char palavrasDoDia[4][TAMANHO_PALAVRA];
+  char gabaritos[4][TAMANHO_PALAVRA];
+  
   int tentativas = 0;
-  bool jogoTerminou = false, venceu = false;
+  bool jogoTerminou = false, venceu = false, feitas[4] = {false};
 
   std::cout << "===================================================\n";
   std::cout << "TERMO\n";
@@ -4652,18 +4653,31 @@ int main()
   std::cout << "C: letra está na posição certa.\n";
   std::cout << "===================================================\n\n";
 
+  definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavrasDoDia, modo);
+
+  std::cout << "Digite uma palavra de 5 letras:\n";
+
   if (modo == 1)
   {
-
-    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia1);
-
-    std::cout << "Digite uma palavra de 5 letras:\n";
-
     do
     {
       getPalavra(palavraDigitada);
 
-      venceu = checkPalavra(palavraDigitada, palavraDia1, gabarito1);
+      venceu = checkPalavra(palavraDigitada, palavrasDoDia, gabaritos, feitas, modo);
+      std::cout << std::left << std::setw(7) << std::setfill(' ') << palavraDigitada << "\n"; 
+      for(int i = 0; i < modo; i++){
+        if (feitas[i])
+        {
+          std::cout << std::left << std::setw(7) << std::setfill(' ') << ""; 
+        }
+        else
+        {
+          std::cout << std::left << std::setw(7) << std::setfill(' ');
+          for(int j = 0; j < TAMANHO_PALAVRA; j++)
+            std::cout<<gabaritos[i][j];
+        }
+      }
+      std::cout<<"\n\n";
       tentativas++;
       jogoTerminou = tentativas > 5 || venceu;
 
@@ -4675,50 +4689,36 @@ int main()
     }
     else
     {
-      std::cout << "A palavra era " << palavraDia1 << ".\n";
+      std::cout << "A palavra era ";
+      for(int i = 0; i < TAMANHO_PALAVRA; i++)
+        std::cout<<palavrasDoDia[1][i];
+      std::cout<<".\n";
       std::cout << "Fim do Jogo. Aperte para finalizar.\n";
       std::cin.ignore();
     }
   }
   else if (modo == 2)
-  {
-    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia1);
-    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia2);
-
-    std::cout << "Digite uma palavra de 5 letras:\n";
-
-    bool umaFeita = false;
-    bool segundaFeita = false;
-    
+  {    
     do
     {
       getPalavra(palavraDigitada);
 
-
-      if (!umaFeita) umaFeita = checkPalavra(palavraDigitada, palavraDia1, gabarito1);
-      if (!segundaFeita) segundaFeita = checkPalavra(palavraDigitada, palavraDia2, gabarito2);
-
+      venceu = checkPalavra(palavraDigitada, palavrasDoDia, gabaritos, feitas, modo);
+    
       std::cout << std::left << std::setw(7) << std::setfill(' ') << palavraDigitada << std::left << palavraDigitada << "\n"; 
-
-      if (umaFeita)
-      {
-        std::cout << std::left << std::setw(7) << std::setfill(' ') << ""; 
+      for(int i = 0; i < modo; i++){
+        if (feitas[i])
+        {
+          std::cout << std::left << std::setw(7) << std::setfill(' ') << ""; 
+        }
+        else
+        {
+          std::cout << std::left << std::setw(7) << std::setfill(' ');
+          for(int j = 0; j < TAMANHO_PALAVRA; j++)
+            std::cout<<gabaritos[i][j];
+        }
       }
-      else
-      {
-        std::cout << std::left << std::setw(7) << std::setfill(' ') << gabarito1; 
-      }
-      
-      if (segundaFeita)
-      {
-        std::cout << std::left << "\n\n"; 
-      }
-      else
-      {
-        std::cout << std::left << gabarito2 << "\n\n"; 
-      }
-
-      venceu = umaFeita && segundaFeita;
+      std::cout<<"\n\n";
       tentativas++;
       jogoTerminou = tentativas > 5 || venceu;
 
@@ -4730,19 +4730,18 @@ int main()
     }
     else
     {
-      std::cout << "A palavras eram " << palavraDia1 << " e " << palavraDia2 << ".\n";
+      std::cout << "A palavras eram ";
+      for(int i = 0; i < TAMANHO_PALAVRA; i++)
+        std::cout<<palavrasDoDia[1][i];
+      std::cout<<" e ";
+      for(int i = 0; i < TAMANHO_PALAVRA; i++)
+        std::cout<<palavrasDoDia[2][i];
+      std::cout<< ".\n";
       std::cout << "Fim do Jogo. Aperte para finalizar.\n";
     }
   }
-  else if (modo == 4)
+  /*else if (modo == 4)
   {
-    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia1);
-    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia2);
-    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia3);
-    definePalavraDoDia(std::rand() % TAMANHO_LISTA, palavraDia4);
-
-    std::cout << "Digite uma palavra de 5 letras:\n";
-
     bool umaFeita = false;
     bool segundaFeita = false;
     bool terceiraFeita = false;
@@ -4751,7 +4750,6 @@ int main()
     do
     {
       getPalavra(palavraDigitada);
-
 
       if (!umaFeita) umaFeita = checkPalavra(palavraDigitada, palavraDia1, gabarito1);
       if (!segundaFeita) segundaFeita = checkPalavra(palavraDigitada, palavraDia2, gabarito2);
@@ -4812,62 +4810,58 @@ int main()
       std::cout << "Fim do Jogo. Aperte para finalizar.\n";
     }
   }
-
+  */
   std::cin.ignore();
 
   return 0;
 }
 
 
-bool checkPalavra(const char palavraDigitada[], const char palavraDia[], char gabaritoo[])
+bool checkPalavra(const char palavraDigitada[], const char palavrasDoDia[][TAMANHO_PALAVRA], char gabaritos[][TAMANHO_PALAVRA], bool feitas[], int modo)
 {
   /* Status de cada letra digitada pelo usuário, sendo que:
   N = Não existe na palavra.
   E = Existe, mas está na posição errada.
   C = Correta a posiçao para letra.
   */
+  bool venceu = true;
+  for(int k = 0;  k < modo; k++){
 
-  char gabarito[6] = "";
+    char gabarito[6] = "";
+    bool jaVistoPalavraDia[5] = {false};
 
-  bool jaVistoPalavraDia[5] = {false};
-
-  for (int i = 0; i < 5; i++)
-  {
-    if (palavraDigitada[i] == palavraDia[i])
-    {
-      gabarito[i] = 'C';
-      jaVistoPalavraDia[i] = true;
-    }
-  }
-
-  for (int i = 0; i < 5; i++)
-  {
-    if (gabarito[i])
-      continue;
-
-    bool encontrado = false;
-
-    for (int j = 0; j < 5; j++)
-    {
-      if (!jaVistoPalavraDia[j] && palavraDigitada[i] == palavraDia[j])
+    for (int i = 0; i < 5; i++)
+      if (palavraDigitada[i] == palavrasDoDia[k][i])
       {
-        gabarito[i] = 'E';
-        jaVistoPalavraDia[j] = true;
-
-        encontrado = true;
-        break;
+        gabarito[i] = 'C';
+        jaVistoPalavraDia[i] = true;
       }
-    }
 
-    if (!encontrado)
+    for (int i = 0; i < 5; i++)
     {
-      gabarito[i] = 'N';
+      if (gabarito[i])
+        continue;
+      bool encontrado = false;
+
+      for (int j = 0; j < 5; j++)
+        if (!jaVistoPalavraDia[j] && palavraDigitada[i] == palavrasDoDia[k][i])
+        {
+          gabarito[i] = 'E';
+          jaVistoPalavraDia[j] = true;
+
+          encontrado = true;
+          break;
+        }
+      
+      if (!encontrado)
+        gabarito[i] = 'N';
     }
+    strcpy(gabaritos[k], gabarito);
+    feitas[k] = strcmp(palavraDigitada, palavrasDoDia[k]);
+    venceu = venceu && !feitas[k];
   }
 
-  strcpy(gabaritoo, gabarito);
-
-  return !strcmp(palavraDigitada, palavraDia);
+  return venceu;
 }
 
 /* ADIÇÃO */
@@ -4900,7 +4894,7 @@ bool eValidaPalavra(char palavra[])
 {
   for (int i = 0; i < 5; i++)
   {
-    if (!(palavra[i] >= 'A' && palavra[i] <= 'Z' || palavra[i] >= 'a' && palavra[i] <= 'z'))
+    if (!((palavra[i] >= 'A' && palavra[i] <= 'Z') || (palavra[i] >= 'a' && palavra[i] <= 'z')))
     {
       return false;
     }
@@ -4918,7 +4912,8 @@ char converterParaCaixaBaixa(char caractere)
   return caractere;
 }
 
-void definePalavraDoDia(int randomNumber, char palavraDoDia[6])
+void definePalavraDoDia(int randomNumber, char palavrasDoDia[][TAMANHO_PALAVRA], int modo)
 {
-  std::strcpy(palavraDoDia, palavras[randomNumber]);
+  for(int i = 0; i < modo; i++)
+    std::strcpy(palavrasDoDia[i], palavras[randomNumber]);
 }
